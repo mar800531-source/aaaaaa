@@ -1,301 +1,75 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>هروب عمار ياسر</title>
+<title>هروب عمار ياسر — صنعاء</title>
 <style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:Arial,sans-serif;touch-action:none}
-canvas{display:block}
-#hud{position:fixed;top:10px;left:0;right:0;z-index:10;color:#fff;text-shadow:0 2px 5px #000;pointer-events:none}
-#title{text-align:center;font-size:25px;font-weight:bold}
-#stats{display:flex;justify-content:space-between;padding:8px 15px;font-size:18px}
-#timeBar{width:180px;height:7px;margin:auto;background:#ffffff55;border-radius:10px}
-#timeFill{width:0%;height:100%;background:#ffd600;border-radius:10px}
-#buttons{position:fixed;bottom:18px;left:0;right:0;z-index:20;display:flex;justify-content:center;gap:12px;direction:ltr}
-.control{width:65px;height:58px;border:2px solid #fff;border-radius:16px;background:#0008;color:#fff;font-size:25px}
-#sound{position:fixed;left:12px;bottom:18px;z-index:25;width:55px;height:55px;border:2px solid white;border-radius:15px;background:#0008;color:#fff;font-size:22px}
-.screen{position:fixed;inset:0;z-index:50;background:#000b;color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
-.screen h1{color:#ffd600;font-size:42px;margin:10px}
-.screen h2{color:#ff5252;font-size:36px}
-.screen button{border:0;border-radius:15px;padding:15px 40px;background:#2196f3;color:#fff;font-size:21px;font-weight:bold}
-#gameOver{display:none}
-#loading{position:fixed;inset:0;z-index:100;display:flex;justify-content:center;align-items:center;background:#111;color:#fff;font-size:20px}
-#tip{position:fixed;bottom:92px;left:0;right:0;text-align:center;color:#fff8;font-size:13px;z-index:15;pointer-events:none}
-</style>
-</head>
-<body>
-<div id="loading">جاري تحميل هروب عمار ياسر...</div>
-<div id="hud">
-  <div id="title">👶 هروب عمار ياسر</div>
-  <div id="stats"><span id="score">النقاط: 0</span><span id="coins">🪙 0</span><span id="time">☀️ نهار</span></div>
-  <div id="timeBar"><div id="timeFill"></div></div>
-</div>
-<div id="buttons">
-  <button class="control" id="left">⬅️</button>
-  <button class="control" id="jump">⬆️</button>
-  <button class="control" id="right">➡️</button>
-</div>
-<div id="tip">اسحب يمينًا أو يسارًا للتحرك • اسحب للأعلى للقفز</div>
-<button id="sound">🔊</button>
-<div id="start" class="screen">
-  <h1>هروب عمار ياسر</h1>
-  <p>👶 شارع يمني ثلاثي الأبعاد<br>🐕 اهرب من الكلاب والقطط والسيارات</p>
-  <button>ابدأ اللعب 🎮</button>
-</div>
-<div id="gameOver" class="screen">
-  <h2>انتهت اللعبة</h2>
-  <p id="result"></p>
-  <button>إعادة اللعب 🔄</button>
-</div>
-
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;font-family:Arial}
+canvas{display:block}#hud{position:fixed;top:8px;left:0;right:0;z-index:5;color:#fff;text-shadow:0 2px 5px #000;pointer-events:none}
+#title{text-align:center;font-size:24px;font-weight:bold}#stats{display:flex;justify-content:space-between;padding:7px 14px;font-size:17px}
+#bar{height:6px;width:180px;margin:auto;background:#ffffff55;border-radius:9px;overflow:hidden}#fill{height:100%;width:0;background:#ffd600}
+#controls{position:fixed;bottom:16px;left:0;right:0;z-index:10;display:flex;justify-content:center;gap:12px;direction:ltr}
+.btn{width:68px;height:58px;border:2px solid #fff;border-radius:17px;background:#0008;color:#fff;font-size:25px}
+#mute{position:fixed;bottom:17px;left:12px;z-index:11;width:55px;height:55px;border:2px solid #fff;border-radius:15px;background:#0008;color:#fff;font-size:22px}
+#hint{position:fixed;bottom:88px;left:0;right:0;text-align:center;color:#fff9;font-size:12px;z-index:6}
+.screen{position:fixed;inset:0;z-index:50;background:#000c;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:25px}
+.screen h1{font-size:40px;color:#ffd600;margin:5px 0 15px}.screen h2{font-size:35px;color:#ff5252}.screen button{border:0;border-radius:14px;background:#1976d2;color:#fff;padding:14px 35px;font-size:20px;font-weight:bold}
+#over{display:none}#load{position:fixed;inset:0;z-index:100;background:#111;color:#fff;display:flex;align-items:center;justify-content:center}
+</style></head><body>
+<div id="load">جاري تجهيز شارع صنعاء...</div>
+<div id="hud"><div id="title">👧 هروب عمار ياسر</div><div id="stats"><span id="score">النقاط: 0</span><span id="coins">🪙 0</span><span id="clock">☀️ نهار</span></div><div id="bar"><div id="fill"></div></div></div>
+<div id="controls"><button class="btn" id="L">⬅️</button><button class="btn" id="J">⬆️</button><button class="btn" id="R">➡️</button></div>
+<button id="mute">🔊</button><div id="hint">اسحب بسرعة يمين/يسار للتحرك — اسحب للأعلى للقفز</div>
+<div id="start" class="screen"><h1>هروب عمار ياسر</h1><p>شارع يمني مستوحى من صنعاء القديمة</p><p>👧 طفلة 3D خيالية • 🏘️ مبانٍ يمنية • 🐕 كلاب • 🐈 قطط • 🚗 سيارات</p><button>ابدأ اللعب 🎮</button></div>
+<div id="over" class="screen"><h2>انتهت اللعبة</h2><p id="result"></p><button>إعادة اللعب 🔄</button></div>
 <script type="module">
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
-
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x75cfff);
-scene.fog=new THREE.Fog(0x75cfff,35,170);
-
-const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,300);
-camera.position.set(0,4.5,9);
-
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled=true;
-document.body.appendChild(renderer.domElement);
-
-const ambient=new THREE.HemisphereLight(0xbfe9ff,0x3b281b,1.7);
-scene.add(ambient);
-const sun=new THREE.DirectionalLight(0xffffff,2);
-sun.position.set(-30,50,30);
-sun.castShadow=true;
-scene.add(sun);
-
-const road=new THREE.Mesh(
-  new THREE.PlaneGeometry(18,600),
-  new THREE.MeshStandardMaterial({color:0x383838,roughness:1})
-);
-road.rotation.x=-Math.PI/2; road.position.z=-280; road.receiveShadow=true; scene.add(road);
-
-for(const side of [-1,1]){
-  const sidewalk=new THREE.Mesh(
-    new THREE.BoxGeometry(5,.3,600),
-    new THREE.MeshStandardMaterial({color:0xb08c6b})
-  );
-  sidewalk.position.set(side*11.5,.15,-280);
-  sidewalk.receiveShadow=true; scene.add(sidewalk);
-}
-for(let z=5;z>-590;z-=10){
-  const line=new THREE.Mesh(
-    new THREE.BoxGeometry(.15,.03,5),
-    new THREE.MeshBasicMaterial({color:0xffffff})
-  );
-  line.position.set(0,.03,z); scene.add(line);
-}
-
-/* مبانٍ يمنية مبسطة */
-const buildingColors=[0xc99e70,0xb98659,0xd4b080,0xa97851,0xe0bd8d];
-function building(x,z){
-  const h=4+Math.random()*7,w=3+Math.random()*3,d=4+Math.random()*5;
-  const b=new THREE.Mesh(
-    new THREE.BoxGeometry(w,h,d),
-    new THREE.MeshStandardMaterial({color:buildingColors[Math.floor(Math.random()*buildingColors.length)]})
-  );
-  b.position.set(x,h/2,z); b.castShadow=true; b.receiveShadow=true; scene.add(b);
-  for(let y=1.5;y<h-1;y+=1.7){
-    const win=new THREE.Mesh(
-      new THREE.BoxGeometry(.65,.8,.04),
-      new THREE.MeshBasicMaterial({color:0x263b50})
-    );
-    win.position.set(x,y,z-d/2-.03); scene.add(win);
-  }
-}
-for(let z=0;z>-600;z-=14){
-  building(-14-Math.random()*3,z);
-  building(14+Math.random()*3,z-7);
-}
-
-/* الطفلة */
-const player=new THREE.Group(); scene.add(player);
-const skin=new THREE.MeshStandardMaterial({color:0xf1b080,roughness:.8});
-const dress=new THREE.MeshStandardMaterial({color:0xf06292,roughness:.8});
-const dark=new THREE.MeshStandardMaterial({color:0x333333});
-const head=new THREE.Mesh(new THREE.SphereGeometry(.4,24,24),skin);
-head.position.y=1.55; head.castShadow=true; player.add(head);
-const hair=new THREE.Mesh(new THREE.SphereGeometry(.42,20,20),new THREE.MeshStandardMaterial({color:0x24160f}));
-hair.scale.set(1,.7,1); hair.position.set(0,1.77,-.03); player.add(hair);
-const body=new THREE.Mesh(new THREE.CapsuleGeometry(.3,.55,8,16),dress);
-body.position.y=.95; body.castShadow=true; player.add(body);
-function leg(x){const l=new THREE.Mesh(new THREE.CapsuleGeometry(.11,.5,6,10),dark);l.position.set(x,.38,0);l.castShadow=true;player.add(l);return l}
-const legL=leg(-.13),legR=leg(.13);
-
-const lanes=[-3.2,0,3.2];
-let lane=1,targetX=0;
-
-function dog(){
-  const g=new THREE.Group(), fur=new THREE.MeshStandardMaterial({color:0x70452d});
-  const b=new THREE.Mesh(new THREE.BoxGeometry(1,.65,1.45),fur);b.position.y=.65;g.add(b);
-  const h=new THREE.Mesh(new THREE.SphereGeometry(.43,16,16),fur);h.position.set(0,1.05,.75);g.add(h);
-  const n=new THREE.Mesh(new THREE.SphereGeometry(.12,10,10),dark);n.position.set(0,1.02,1.13);g.add(n);
-  for(const x of [-.35,.35])for(const z of [-.45,.45]){
-    const l=new THREE.Mesh(new THREE.BoxGeometry(.18,.55,.18),fur);l.position.set(x,.3,z);g.add(l)
-  }
-  g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g
-}
-function cat(){
-  const g=new THREE.Group(),fur=new THREE.MeshStandardMaterial({color:0x777777});
-  const b=new THREE.Mesh(new THREE.SphereGeometry(.4,18,18),fur);b.scale.set(1,.75,1.25);b.position.y=.45;g.add(b);
-  const h=new THREE.Mesh(new THREE.SphereGeometry(.32,18,18),fur);h.position.set(0,.75,.4);g.add(h);
-  g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g
-}
-function car(){
-  const g=new THREE.Group();
-  const m=new THREE.MeshStandardMaterial({color:[0x1565c0,0xd32f2f,0xeeeeee,0x212121][Math.floor(Math.random()*4)]});
-  const b=new THREE.Mesh(new THREE.BoxGeometry(1.8,.65,3.2),m);b.position.y=.55;g.add(b);
-  const r=new THREE.Mesh(new THREE.BoxGeometry(1.45,.55,1.55),m);r.position.set(0,1.05,-.1);g.add(r);
-  g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g
-}
-function coin(){
-  const c=new THREE.Mesh(new THREE.CylinderGeometry(.25,.25,.08,24),
-    new THREE.MeshStandardMaterial({color:0xffd600,metalness:.8,roughness:.2}));
-  c.rotation.x=Math.PI/2;c.position.y=1;return c
-}
-
-let objects=[],coins=[];
-let playing=false,score=0,coinCount=0,speed=12,jump=0,jumpVelocity=0,spawnTimer=0,coinTimer=0,gameTime=0;
-const DAY_LENGTH=300;
-
-function updateTime(dt){
-  gameTime+=dt;if(gameTime>DAY_LENGTH)gameTime=0;
-  const p=gameTime/DAY_LENGTH,daylight=Math.max(0,Math.sin(p*Math.PI*2));
-  const color=new THREE.Color(.12+daylight*.55,.16+daylight*.65,.25+daylight*.65);
-  scene.background=color;scene.fog.color=color;
-  sun.intensity=.3+daylight*1.8;ambient.intensity=.35+daylight*1.35;
-  const text=p<.2?"🌅 فجر":p<.5?"☀️ نهار":p<.7?"🌇 غروب":"🌙 ليل";
-  document.getElementById("time").textContent=text;
-  document.getElementById("timeFill").style.width=(p*100)+"%";
-}
-function spawnAnimal(){
-  const o=Math.random()<.65?dog():cat(),l=Math.floor(Math.random()*3);
-  o.position.set(lanes[l],0,-90);o.userData.lane=l;scene.add(o);objects.push(o)
-}
-function spawnCar(){
-  const o=car(),l=Math.floor(Math.random()*3);
-  o.position.set(lanes[l],0,-120);o.userData.lane=l;scene.add(o);objects.push(o)
-}
-function spawnCoin(){
-  const c=coin(),l=Math.floor(Math.random()*3);
-  c.position.set(lanes[l],0,-80);c.userData.lane=l;scene.add(c);coins.push(c)
-}
-
-/* تحكم لمس سريع */
-function moveLeft(){if(!playing)return;lane=Math.max(0,lane-1);targetX=lanes[lane]}
-function moveRight(){if(!playing)return;lane=Math.min(2,lane+1);targetX=lanes[lane]}
-function doJump(){if(!playing)return;if(jump===0){jumpVelocity=11;beep(500,.12)}}
-
-function bindTouch(id,fn){
-  document.getElementById(id).addEventListener("touchstart",e=>{e.preventDefault();fn()},{passive:false})
-}
-bindTouch("left",moveLeft);bindTouch("right",moveRight);bindTouch("jump",doJump);
-
-let touchStartX=0,touchStartY=0;
-renderer.domElement.addEventListener("touchstart",e=>{
-  const t=e.changedTouches[0];touchStartX=t.clientX;touchStartY=t.clientY
-},{passive:true});
-renderer.domElement.addEventListener("touchend",e=>{
-  if(!playing)return;
-  const t=e.changedTouches[0],dx=t.clientX-touchStartX,dy=t.clientY-touchStartY;
-  if(Math.abs(dx)<20&&Math.abs(dy)<20)return;
-  if(Math.abs(dx)>Math.abs(dy)){dx>0?moveRight():moveLeft()}else if(dy<0)doJump()
-},{passive:true});
-
-/* لوحة المفاتيح */
-addEventListener("keydown",e=>{
-  if(e.key==="ArrowLeft")moveLeft();
-  if(e.key==="ArrowRight")moveRight();
-  if(e.key==="ArrowUp"||e.key===" ")doJump()
-});
-
-/* أصوات مولدة من المتصفح */
-let audio=null,soundOn=true;
-function initAudio(){if(audio)return;audio=new(window.AudioContext||window.webkitAudioContext)()}
-function beep(frequency,duration,volume=.06){
-  if(!soundOn)return;initAudio();if(audio.state==="suspended")audio.resume();
-  const osc=audio.createOscillator(),gain=audio.createGain();
-  osc.type="sine";osc.frequency.value=frequency;gain.gain.value=volume;
-  osc.connect(gain);gain.connect(audio.destination);osc.start();
-  gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);
-  osc.stop(audio.currentTime+duration)
-}
-function coinSound(){beep(900,.08,.08);setTimeout(()=>beep(1300,.1,.06),70)}
-function crashSound(){beep(100,.5,.12)}
-document.getElementById("sound").addEventListener("click",()=>{
-  soundOn=!soundOn;document.getElementById("sound").textContent=soundOn?"🔊":"🔇"
-});
-
-function collision(){
-  const pBox=new THREE.Box3().setFromObject(player);
-  for(let i=objects.length-1;i>=0;i--){
-    const o=objects[i];
-    if(o.position.z>-3&&o.position.z<2&&jump<.8){
-      const box=new THREE.Box3().setFromObject(o);
-      if(pBox.intersectsBox(box)){endGame();return}
-    }
-  }
-}
-function collectCoins(){
-  const pBox=new THREE.Box3().setFromObject(player);
-  for(let i=coins.length-1;i>=0;i--){
-    const c=coins[i],box=new THREE.Box3().setFromObject(c);
-    if(pBox.intersectsBox(box)){coinCount++;score+=10;coinSound();scene.remove(c);coins.splice(i,1)}
-  }
-}
-function endGame(){
-  playing=false;crashSound();
-  document.getElementById("result").innerHTML="النقاط: "+Math.floor(score)+"<br>🪙 العملات: "+coinCount;
-  document.getElementById("gameOver").style.display="flex"
-}
-function clearObjects(){objects.forEach(o=>scene.remove(o));coins.forEach(c=>scene.remove(c));objects=[];coins=[]}
-function startGame(){
-  initAudio();clearObjects();playing=true;score=0;coinCount=0;speed=12;lane=1;targetX=0;jump=0;jumpVelocity=0;spawnTimer=0;coinTimer=0;gameTime=0;
-  player.position.set(0,0,0);
-  document.getElementById("start").style.display="none";
-  document.getElementById("gameOver").style.display="none"
-}
-document.querySelector("#start button").addEventListener("click",startGame);
-document.querySelector("#gameOver button").addEventListener("click",startGame);
-
-let previous=performance.now();
-function animate(now){
-  requestAnimationFrame(animate);
-  const dt=Math.min((now-previous)/1000,.05);previous=now;
-  if(playing){
-    player.position.x+=(targetX-player.position.x)*Math.min(1,24*dt);
-    if(jumpVelocity!==0||jump>0){jump+=jumpVelocity*dt;jumpVelocity-=27*dt;if(jump<=0){jump=0;jumpVelocity=0}}
-    player.position.y=jump;
-    const run=Math.sin(now*.025)*.45;legL.rotation.x=run;legR.rotation.x=-run;
-    camera.position.x+=(player.position.x-camera.position.x)*Math.min(1,10*dt);
-    camera.position.y=4.3+jump*.25;camera.lookAt(player.position.x,1,-10);
-    speed+=.25*dt;
-    spawnTimer+=dt;
-    if(spawnTimer>Math.max(.55,1.5-speed*.025)){spawnAnimal();if(Math.random()<.25)spawnCar();spawnTimer=0}
-    coinTimer+=dt;if(coinTimer>.7){spawnCoin();coinTimer=0}
-    for(let i=objects.length-1;i>=0;i--){const o=objects[i];o.position.z+=speed*dt;if(o.position.z>15){scene.remove(o);objects.splice(i,1)}}
-    for(let i=coins.length-1;i>=0;i--){const c=coins[i];c.position.z+=speed*dt;c.rotation.y+=dt*6;if(c.position.z>15){scene.remove(c);coins.splice(i,1)}}
-    score+=speed*dt*.35;
-    document.getElementById("score").textContent="النقاط: "+Math.floor(score);
-    document.getElementById("coins").textContent="🪙 "+coinCount;
-    updateTime(dt);collision();collectCoins();
-  }
-  renderer.render(scene,camera)
-}
-requestAnimationFrame(animate);
-
-addEventListener("resize",()=>{
-  camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)
-});
-document.getElementById("loading").style.display="none";
-</script>
-</body>
-</html>
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(63,innerWidth/innerHeight,.1,350);
+camera.position.set(0,4.6,9);scene.background=new THREE.Color(0x87c9e8);scene.fog=new THREE.Fog(0x87c9e8,35,190);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;document.body.appendChild(renderer.domElement);
+const hemi=new THREE.HemisphereLight(0xdff4ff,0x4b3022,1.6);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff0d0,2.2);sun.position.set(-35,55,25);sun.castShadow=true;scene.add(sun);
+const M=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+const road=new THREE.Mesh(new THREE.PlaneGeometry(18,700),M(0x353535,1));road.rotation.x=-Math.PI/2;road.position.z=-330;road.receiveShadow=true;scene.add(road);
+for(const s of[-1,1]){let q=new THREE.Mesh(new THREE.BoxGeometry(5,.35,700),M(0xb79676));q.position.set(s*11.5,.17,-330);q.receiveShadow=true;scene.add(q)}
+for(let z=4;z>-680;z-=9){let q=new THREE.Mesh(new THREE.BoxGeometry(.13,.025,4.3),new THREE.MeshBasicMaterial({color:0xffffff}));q.position.set(0,.03,z);scene.add(q)}
+const wall=[0xc9a477,0xb98b61,0xd4b48a,0xae7b55,0xe0c092];
+function building(x,z,side){let h=5+Math.random()*7,w=3.5+Math.random()*3,d=4+Math.random()*4,g=new THREE.Group();
+let b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(wall[(Math.random()*wall.length)|0]));b.position.y=h/2;g.add(b);
+for(let tier=1;tier<3;tier++){let t=new THREE.Mesh(new THREE.BoxGeometry(w*(1-tier*.12),.65,d*.94),M(0xe0c8a8));t.position.y=h-tier*.9;g.add(t)}
+let front=-side*d/2;for(let y=1.25;y<h-1;y+=1.55)for(let q=-1;q<=1;q++){if(Math.random()<.18)continue;
+let win=new THREE.Mesh(new THREE.BoxGeometry(.55,.75,.055),M(0x315064,.55));win.position.set(q*w*.27,y,front+side*.03);g.add(win);
+for(let yy of[-.42,.42]){let f=new THREE.Mesh(new THREE.BoxGeometry(.72,.08,.07),M(0xf4eee1));f.position.set(q*w*.27,y+yy,front+side*.05);g.add(f)}}
+let sign=new THREE.Mesh(new THREE.BoxGeometry(w*.55,.5,.05),M(0x7b3f25));sign.position.set(0,1.05,front+side*.08);g.add(sign);
+g.position.set(x,0,z);g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene.add(g)}
+for(let z=0;z>-670;z-=15){building(-14-Math.random()*2.5,z,-1);building(14+Math.random()*2.5,z-6,1)}
+for(let z=-5;z>-650;z-=25)for(const x of[-8.8,8.8]){let p=new THREE.Mesh(new THREE.CylinderGeometry(.09,.13,6,8),M(0x4a4139));p.position.set(x,3,z);scene.add(p);let l=new THREE.Mesh(new THREE.SphereGeometry(.16,10,10),M(0xffdf8a,.3));l.position.set(x,6,z);scene.add(l)}
+const player=new THREE.Group();scene.add(player),skin=M(0xe7a67e,.9),hair=M(0x24160f,.9),dress=M(0xe85d91,.85),shoe=M(0x3a302d);
+let head=new THREE.Mesh(new THREE.SphereGeometry(.42,28,22),skin);head.position.y=1.55;head.castShadow=true;player.add(head);
+let h=new THREE.Mesh(new THREE.SphereGeometry(.44,28,22),hair);h.position.set(0,1.73,-.06);h.scale.set(1,.7,1);player.add(h);
+let body=new THREE.Mesh(new THREE.CapsuleGeometry(.3,.55,10,20),dress);body.position.y=.95;player.add(body);
+function limb(x,y,z,r,len,ma){let o=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,6,10),ma);o.position.set(x,y,z);o.castShadow=true;player.add(o);return o}
+const lLeg=limb(-.13,.38,0,.11,.48,shoe),rLeg=limb(.13,.38,0,.11,.48,shoe),lArm=limb(-.36,1.03,0,.09,.38,skin),rArm=limb(.36,1.03,0,.09,.38,skin);
+const lanes=[-3.2,0,3.2];let lane=1,targetX=0;
+function dog(){let g=new THREE.Group(),fur=M(0x70452d),dk=M(0x201814);let b=new THREE.Mesh(new THREE.BoxGeometry(1.05,.65,1.45),fur);b.position.y=.65;g.add(b);let h=new THREE.Mesh(new THREE.SphereGeometry(.43,18,16),fur);h.position.set(0,1.05,.72);g.add(h);let n=new THREE.Mesh(new THREE.SphereGeometry(.12,12,12),dk);n.position.set(0,1.02,1.1);g.add(n);for(const x of[-.36,.36])for(const z of[-.45,.45]){let q=new THREE.Mesh(new THREE.BoxGeometry(.18,.55,.18),fur);q.position.set(x,.3,z);g.add(q)}return g}
+function cat(){let g=new THREE.Group(),f=M(0x777777),b=new THREE.Mesh(new THREE.SphereGeometry(.4,20,18),f);b.scale.set(1,.72,1.25);b.position.y=.46;g.add(b);let h=new THREE.Mesh(new THREE.SphereGeometry(.32,20,18),f);h.position.set(0,.78,.42);g.add(h);return g}
+function car(){let g=new THREE.Group(),m=M([0x1565c0,0xd32f2f,0xececec,0x242424][(Math.random()*4)|0],.45,.15),b=new THREE.Mesh(new THREE.BoxGeometry(1.9,.65,3.2),m);b.position.y=.55;g.add(b);let r=new THREE.Mesh(new THREE.BoxGeometry(1.45,.55,1.55),m);r.position.set(0,1.02,-.1);g.add(r);return g}
+function coin(){let c=new THREE.Mesh(new THREE.CylinderGeometry(.25,.25,.08,24),M(0xffd000,.2,.8));c.rotation.x=Math.PI/2;c.position.y=1;return c}
+let objects=[],coins=[],playing=false,score=0,coinCount=0,speed=12,jumpY=0,jv=0,spawn=0,ct=0,world=0;const DAY=300;
+function time(dt){world=(world+dt)%DAY;let p=world/DAY,l=Math.max(0,Math.sin(p*Math.PI*2)),c=new THREE.Color(.12+l*.55,.16+l*.65,.25+l*.65);scene.background=c;scene.fog.color=c;sun.intensity=.35+l*1.9;hemi.intensity=.35+l*1.3;document.getElementById("clock").textContent=p<.2?"🌅 فجر":p<.5?"☀️ نهار":p<.7?"🌇 غروب":"🌙 ليل";document.getElementById("fill").style.width=p*100+"%"}
+function sa(){let o=Math.random()<.68?dog():cat(),l=(Math.random()*3)|0;o.position.set(lanes[l],0,-95);scene.add(o);objects.push(o)}
+function sc(){let o=car(),l=(Math.random()*3)|0;o.position.set(lanes[l],0,-125);scene.add(o);objects.push(o)}
+function sn(){let c=coin(),l=(Math.random()*3)|0;c.position.set(lanes[l],0,-85);scene.add(c);coins.push(c)}
+function left(){if(playing){lane=Math.max(0,lane-1);targetX=lanes[lane]}}function right(){if(playing){lane=Math.min(2,lane+1);targetX=lanes[lane]}}function up(){if(playing&&jumpY===0){jv=11;beep(520,.12)}}
+function bind(id,fn){document.getElementById(id).addEventListener("touchstart",e=>{e.preventDefault();fn()},{passive:false})}bind("L",left);bind("R",right);bind("J",up);
+let sx=0,sy=0;renderer.domElement.addEventListener("touchstart",e=>{let t=e.changedTouches[0];sx=t.clientX;sy=t.clientY},{passive:true});
+renderer.domElement.addEventListener("touchend",e=>{if(!playing)return;let t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)<20&&Math.abs(dy)<20)return;if(Math.abs(dx)>Math.abs(dy))dx>0?right():left();else if(dy<0)up()},{passive:true});
+addEventListener("keydown",e=>{if(e.key==="ArrowLeft")left();if(e.key==="ArrowRight")right();if(e.key==="ArrowUp"||e.key===" ")up()});
+let audio=null,sound=true;function initAudio(){if(!audio)audio=new(window.AudioContext||window.webkitAudioContext)()}function beep(f,d,v=.06){if(!sound)return;initAudio();if(audio.state==="suspended")audio.resume();let o=audio.createOscillator(),g=audio.createGain();o.frequency.value=f;o.type="sine";g.gain.value=v;o.connect(g);g.connect(audio.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+d);o.stop(audio.currentTime+d)}
+function coinSound(){beep(900,.08,.08);setTimeout(()=>beep(1300,.1,.06),70)}document.getElementById("mute").onclick=()=>{sound=!sound;document.getElementById("mute").textContent=sound?"🔊":"🔇"};
+function clear(){objects.forEach(o=>scene.remove(o));coins.forEach(o=>scene.remove(o));objects=[];coins=[]}
+function over(){playing=false;beep(100,.5,.12);document.getElementById("result").innerHTML="النقاط: "+Math.floor(score)+"<br>🪙 العملات: "+coinCount;document.getElementById("over").style.display="flex"}
+function start(){initAudio();clear();playing=true;score=0;coinCount=0;speed=12;lane=1;targetX=0;jumpY=0;jv=0;spawn=0;ct=0;world=0;player.position.set(0,0,0);document.getElementById("start").style.display="none";document.getElementById("over").style.display="none"}
+document.querySelector("#start button").onclick=start;document.querySelector("#over button").onclick=start;
+function collisions(){let pb=new THREE.Box3().setFromObject(player);for(let o of objects)if(o.position.z>-3&&o.position.z<2&&jumpY<.8&&pb.intersectsBox(new THREE.Box3().setFromObject(o))){over();return}for(let i=coins.length-1;i>=0;i--)if(pb.intersectsBox(new THREE.Box3().setFromObject(coins[i]))){coinCount++;score+=10;coinSound();scene.remove(coins[i]);coins.splice(i,1)}}
+let last=performance.now();function loop(now){requestAnimationFrame(loop);let dt=Math.min((now-last)/1000,.05);last=now;if(playing){player.position.x+=(targetX-player.position.x)*Math.min(1,25*dt);if(jv||jumpY){jumpY+=jv*dt;jv-=27*dt;if(jumpY<=0){jumpY=0;jv=0}}player.position.y=jumpY;let a=Math.sin(now*.024)*.5;lLeg.rotation.x=a;rLeg.rotation.x=-a;lArm.rotation.x=-a*.7;rArm.rotation.x=a*.7;camera.position.x+=(player.position.x-camera.position.x)*Math.min(1,11*dt);camera.position.y=4.4+jumpY*.2;camera.lookAt(player.position.x,1,-11);speed+=.22*dt;spawn+=dt;ct+=dt;if(spawn>Math.max(.55,1.45-speed*.023)){sa();if(Math.random()<.24)sc();spawn=0}if(ct>.72){sn();ct=0}for(let i=objects.length-1;i>=0;i--){objects[i].position.z+=speed*dt;if(objects[i].position.z>16){scene.remove(objects[i]);objects.splice(i,1)}}for(let i=coins.length-1;i>=0;i--){coins[i].position.z+=speed*dt;coins[i].rotation.y+=dt*6;if(coins[i].position.z>16){scene.remove(coins[i]);coins.splice(i,1)}}score+=speed*dt*.35;document.getElementById("score").textContent="النقاط: "+Math.floor(score);document.getElementById("coins").textContent="🪙 "+coinCount;time(dt);collisions()}renderer.render(scene,camera)}
+requestAnimationFrame(loop);addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});document.getElementById("load").style.display="none";
+</script></body></html>
