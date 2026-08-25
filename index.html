@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>هروب عمار ياسر</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:Arial,sans-serif;touch-action:none}
+canvas{display:block}
+#hud{position:fixed;top:10px;left:0;right:0;z-index:10;color:#fff;text-shadow:0 2px 5px #000;pointer-events:none}
+#title{text-align:center;font-size:25px;font-weight:bold}
+#stats{display:flex;justify-content:space-between;padding:8px 15px;font-size:18px}
+#timeBar{width:180px;height:7px;margin:auto;background:#ffffff55;border-radius:10px}
+#timeFill{width:0%;height:100%;background:#ffd600;border-radius:10px}
+#buttons{position:fixed;bottom:18px;left:0;right:0;z-index:20;display:flex;justify-content:center;gap:12px;direction:ltr}
+.control{width:65px;height:58px;border:2px solid #fff;border-radius:16px;background:#0008;color:#fff;font-size:25px}
+#sound{position:fixed;left:12px;bottom:18px;z-index:25;width:55px;height:55px;border:2px solid white;border-radius:15px;background:#0008;color:#fff;font-size:22px}
+.screen{position:fixed;inset:0;z-index:50;background:#000b;color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.screen h1{color:#ffd600;font-size:42px;margin:10px}
+.screen h2{color:#ff5252;font-size:36px}
+.screen button{border:0;border-radius:15px;padding:15px 40px;background:#2196f3;color:#fff;font-size:21px;font-weight:bold}
+#gameOver{display:none}
+#loading{position:fixed;inset:0;z-index:100;display:flex;justify-content:center;align-items:center;background:#111;color:#fff;font-size:20px}
+#tip{position:fixed;bottom:92px;left:0;right:0;text-align:center;color:#fff8;font-size:13px;z-index:15;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="loading">جاري تحميل هروب عمار ياسر...</div>
+<div id="hud">
+  <div id="title">👶 هروب عمار ياسر</div>
+  <div id="stats"><span id="score">النقاط: 0</span><span id="coins">🪙 0</span><span id="time">☀️ نهار</span></div>
+  <div id="timeBar"><div id="timeFill"></div></div>
+</div>
+<div id="buttons">
+  <button class="control" id="left">⬅️</button>
+  <button class="control" id="jump">⬆️</button>
+  <button class="control" id="right">➡️</button>
+</div>
+<div id="tip">اسحب يمينًا أو يسارًا للتحرك • اسحب للأعلى للقفز</div>
+<button id="sound">🔊</button>
+<div id="start" class="screen">
+  <h1>هروب عمار ياسر</h1>
+  <p>👶 شارع يمني ثلاثي الأبعاد<br>🐕 اهرب من الكلاب والقطط والسيارات</p>
+  <button>ابدأ اللعب 🎮</button>
+</div>
+<div id="gameOver" class="screen">
+  <h2>انتهت اللعبة</h2>
+  <p id="result"></p>
+  <button>إعادة اللعب 🔄</button>
+</div>
+
+<script type="module">
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x75cfff);
+scene.fog=new THREE.Fog(0x75cfff,35,170);
+
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,300);
+camera.position.set(0,4.5,9);
+
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+document.body.appendChild(renderer.domElement);
+
+const ambient=new THREE.HemisphereLight(0xbfe9ff,0x3b281b,1.7);
+scene.add(ambient);
+const sun=new THREE.DirectionalLight(0xffffff,2);
+sun.position.set(-30,50,30);
+sun.castShadow=true;
+scene.add(sun);
+
+const road=new THREE.Mesh(
+  new THREE.PlaneGeometry(18,600),
+  new THREE.MeshStandardMaterial({color:0x383838,roughness:1})
+);
+road.rotation.x=-Math.PI/2; road.position.z=-280; road.receiveShadow=true; scene.add(road);
+
+for(const side of [-1,1]){
+  const sidewalk=new THREE.Mesh(
+    new THREE.BoxGeometry(5,.3,600),
+    new THREE.MeshStandardMaterial({color:0xb08c6b})
+  );
+  sidewalk.position.set(side*11.5,.15,-280);
+  sidewalk.receiveShadow=true; scene.add(sidewalk);
+}
+for(let z=5;z>-590;z-=10){
+  const line=new THREE.Mesh(
+    new THREE.BoxGeometry(.15,.03,5),
+    new THREE.MeshBasicMaterial({color:0xffffff})
+  );
+  line.position.set(0,.03,z); scene.add(line);
+}
+
+/* مبانٍ يمنية مبسطة */
+const buildingColors=[0xc99e70,0xb98659,0xd4b080,0xa97851,0xe0bd8d];
+function building(x,z){
+  const h=4+Math.random()*7,w=3+Math.random()*3,d=4+Math.random()*5;
+  const b=new THREE.Mesh(
+    new THREE.BoxGeometry(w,h,d),
+    new THREE.MeshStandardMaterial({color:buildingColors[Math.floor(Math.random()*buildingColors.length)]})
+  );
+  b.position.set(x,h/2,z); b.castShadow=true; b.receiveShadow=true; scene.add(b);
+  for(let y=1.5;y<h-1;y+=1.7){
+    const win=new THREE.Mesh(
+      new THREE.BoxGeometry(.65,.8,.04),
+      new THREE.MeshBasicMaterial({color:0x263b50})
+    );
+    win.position.set(x,y,z-d/2-.03); scene.add(win);
+  }
+}
+for(let z=0;z>-600;z-=14){
+  building(-14-Math.random()*3,z);
+  building(14+Math.random()*3,z-7);
+}
+
+/* الطفلة */
+const player=new THREE.Group(); scene.add(player);
+const skin=new THREE.MeshStandardMaterial({color:0xf1b080,roughness:.8});
+const dress=new THREE.MeshStandardMaterial({color:0xf06292,roughness:.8});
+const dark=new THREE.MeshStandardMaterial({color:0x333333});
+const head=new THREE.Mesh(new THREE.SphereGeometry(.4,24,24),skin);
+head.position.y=1.55; head.castShadow=true; player.add(head);
+const hair=new THREE.Mesh(new THREE.SphereGeometry(.42,20,20),new THREE.MeshStandardMaterial({color:0x24160f}));
+hair.scale.set(1,.7,1); hair.position.set(0,1.77,-.03); player.add(hair);
+const body=new THREE.Mesh(new THREE.CapsuleGeometry(.3,.55,8,16),dress);
+body.position.y=.95; body.castShadow=true; player.add(body);
+function leg(x){const l=new THREE.Mesh(new THREE.CapsuleGeometry(.11,.5,6,10),dark);l.position.set(x,.38,0);l.castShadow=true;player.add(l);return l}
+const legL=leg(-.13),legR=leg(.13);
+
+const lanes=[-3.2,0,3.2];
+let lane=1,targetX=0;
+
+function dog(){
+  const g=new THREE.Group(), fur=new THREE.MeshStandardMaterial({color:0x70452d});
+  const b=new THREE.Mesh(new THREE.BoxGeometry(1,.65,1.45),fur);b.position.y=.65;g.add(b);
+  const h=new THREE.Mesh(new THREE.SphereGeometry(.43,16,16),fur);h.position.set(0,1.05,.75);g.add(h);
+  const n=new THREE.Mesh(new THREE.SphereGeometry(.12,10,10),dark);n.position.set(0,1.02,1.13);g.add(n);
+  for(const x of [-.35,.35])for(const z of [-.45,.45]){
+    const l=new THREE.Mesh(new THREE.BoxGeometry(.18,.55,.18),fur);l.position.set(x,.3,z);g.add(l)
+  }
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g
+}
+function cat(){
+  const g=new THREE.Group(),fur=new THREE.MeshStandardMaterial({color:0x777777});
+  const b=new THREE.Mesh(new THREE.SphereGeometry(.4,18,18),fur);b.scale.set(1,.75,1.25);b.position.y=.45;g.add(b);
+  const h=new THREE.Mesh(new THREE.SphereGeometry(.32,18,18),fur);h.position.set(0,.75,.4);g.add(h);
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g
+}
+function car(){
+  const g=new THREE.Group();
+  const m=new THREE.MeshStandardMaterial({color:[0x1565c0,0xd32f2f,0xeeeeee,0x212121][Math.floor(Math.random()*4)]});
+  const b=new THREE.Mesh(new THREE.BoxGeometry(1.8,.65,3.2),m);b.position.y=.55;g.add(b);
+  const r=new THREE.Mesh(new THREE.BoxGeometry(1.45,.55,1.55),m);r.position.set(0,1.05,-.1);g.add(r);
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g
+}
+function coin(){
+  const c=new THREE.Mesh(new THREE.CylinderGeometry(.25,.25,.08,24),
+    new THREE.MeshStandardMaterial({color:0xffd600,metalness:.8,roughness:.2}));
+  c.rotation.x=Math.PI/2;c.position.y=1;return c
+}
+
+let objects=[],coins=[];
+let playing=false,score=0,coinCount=0,speed=12,jump=0,jumpVelocity=0,spawnTimer=0,coinTimer=0,gameTime=0;
+const DAY_LENGTH=300;
+
+function updateTime(dt){
+  gameTime+=dt;if(gameTime>DAY_LENGTH)gameTime=0;
+  const p=gameTime/DAY_LENGTH,daylight=Math.max(0,Math.sin(p*Math.PI*2));
+  const color=new THREE.Color(.12+daylight*.55,.16+daylight*.65,.25+daylight*.65);
+  scene.background=color;scene.fog.color=color;
+  sun.intensity=.3+daylight*1.8;ambient.intensity=.35+daylight*1.35;
+  const text=p<.2?"🌅 فجر":p<.5?"☀️ نهار":p<.7?"🌇 غروب":"🌙 ليل";
+  document.getElementById("time").textContent=text;
+  document.getElementById("timeFill").style.width=(p*100)+"%";
+}
+function spawnAnimal(){
+  const o=Math.random()<.65?dog():cat(),l=Math.floor(Math.random()*3);
+  o.position.set(lanes[l],0,-90);o.userData.lane=l;scene.add(o);objects.push(o)
+}
+function spawnCar(){
+  const o=car(),l=Math.floor(Math.random()*3);
+  o.position.set(lanes[l],0,-120);o.userData.lane=l;scene.add(o);objects.push(o)
+}
+function spawnCoin(){
+  const c=coin(),l=Math.floor(Math.random()*3);
+  c.position.set(lanes[l],0,-80);c.userData.lane=l;scene.add(c);coins.push(c)
+}
+
+/* تحكم لمس سريع */
+function moveLeft(){if(!playing)return;lane=Math.max(0,lane-1);targetX=lanes[lane]}
+function moveRight(){if(!playing)return;lane=Math.min(2,lane+1);targetX=lanes[lane]}
+function doJump(){if(!playing)return;if(jump===0){jumpVelocity=11;beep(500,.12)}}
+
+function bindTouch(id,fn){
+  document.getElementById(id).addEventListener("touchstart",e=>{e.preventDefault();fn()},{passive:false})
+}
+bindTouch("left",moveLeft);bindTouch("right",moveRight);bindTouch("jump",doJump);
+
+let touchStartX=0,touchStartY=0;
+renderer.domElement.addEventListener("touchstart",e=>{
+  const t=e.changedTouches[0];touchStartX=t.clientX;touchStartY=t.clientY
+},{passive:true});
+renderer.domElement.addEventListener("touchend",e=>{
+  if(!playing)return;
+  const t=e.changedTouches[0],dx=t.clientX-touchStartX,dy=t.clientY-touchStartY;
+  if(Math.abs(dx)<20&&Math.abs(dy)<20)return;
+  if(Math.abs(dx)>Math.abs(dy)){dx>0?moveRight():moveLeft()}else if(dy<0)doJump()
+},{passive:true});
+
+/* لوحة المفاتيح */
+addEventListener("keydown",e=>{
+  if(e.key==="ArrowLeft")moveLeft();
+  if(e.key==="ArrowRight")moveRight();
+  if(e.key==="ArrowUp"||e.key===" ")doJump()
+});
+
+/* أصوات مولدة من المتصفح */
+let audio=null,soundOn=true;
+function initAudio(){if(audio)return;audio=new(window.AudioContext||window.webkitAudioContext)()}
+function beep(frequency,duration,volume=.06){
+  if(!soundOn)return;initAudio();if(audio.state==="suspended")audio.resume();
+  const osc=audio.createOscillator(),gain=audio.createGain();
+  osc.type="sine";osc.frequency.value=frequency;gain.gain.value=volume;
+  osc.connect(gain);gain.connect(audio.destination);osc.start();
+  gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);
+  osc.stop(audio.currentTime+duration)
+}
+function coinSound(){beep(900,.08,.08);setTimeout(()=>beep(1300,.1,.06),70)}
+function crashSound(){beep(100,.5,.12)}
+document.getElementById("sound").addEventListener("click",()=>{
+  soundOn=!soundOn;document.getElementById("sound").textContent=soundOn?"🔊":"🔇"
+});
+
+function collision(){
+  const pBox=new THREE.Box3().setFromObject(player);
+  for(let i=objects.length-1;i>=0;i--){
+    const o=objects[i];
+    if(o.position.z>-3&&o.position.z<2&&jump<.8){
+      const box=new THREE.Box3().setFromObject(o);
+      if(pBox.intersectsBox(box)){endGame();return}
+    }
+  }
+}
+function collectCoins(){
+  const pBox=new THREE.Box3().setFromObject(player);
+  for(let i=coins.length-1;i>=0;i--){
+    const c=coins[i],box=new THREE.Box3().setFromObject(c);
+    if(pBox.intersectsBox(box)){coinCount++;score+=10;coinSound();scene.remove(c);coins.splice(i,1)}
+  }
+}
+function endGame(){
+  playing=false;crashSound();
+  document.getElementById("result").innerHTML="النقاط: "+Math.floor(score)+"<br>🪙 العملات: "+coinCount;
+  document.getElementById("gameOver").style.display="flex"
+}
+function clearObjects(){objects.forEach(o=>scene.remove(o));coins.forEach(c=>scene.remove(c));objects=[];coins=[]}
+function startGame(){
+  initAudio();clearObjects();playing=true;score=0;coinCount=0;speed=12;lane=1;targetX=0;jump=0;jumpVelocity=0;spawnTimer=0;coinTimer=0;gameTime=0;
+  player.position.set(0,0,0);
+  document.getElementById("start").style.display="none";
+  document.getElementById("gameOver").style.display="none"
+}
+document.querySelector("#start button").addEventListener("click",startGame);
+document.querySelector("#gameOver button").addEventListener("click",startGame);
+
+let previous=performance.now();
+function animate(now){
+  requestAnimationFrame(animate);
+  const dt=Math.min((now-previous)/1000,.05);previous=now;
+  if(playing){
+    player.position.x+=(targetX-player.position.x)*Math.min(1,24*dt);
+    if(jumpVelocity!==0||jump>0){jump+=jumpVelocity*dt;jumpVelocity-=27*dt;if(jump<=0){jump=0;jumpVelocity=0}}
+    player.position.y=jump;
+    const run=Math.sin(now*.025)*.45;legL.rotation.x=run;legR.rotation.x=-run;
+    camera.position.x+=(player.position.x-camera.position.x)*Math.min(1,10*dt);
+    camera.position.y=4.3+jump*.25;camera.lookAt(player.position.x,1,-10);
+    speed+=.25*dt;
+    spawnTimer+=dt;
+    if(spawnTimer>Math.max(.55,1.5-speed*.025)){spawnAnimal();if(Math.random()<.25)spawnCar();spawnTimer=0}
+    coinTimer+=dt;if(coinTimer>.7){spawnCoin();coinTimer=0}
+    for(let i=objects.length-1;i>=0;i--){const o=objects[i];o.position.z+=speed*dt;if(o.position.z>15){scene.remove(o);objects.splice(i,1)}}
+    for(let i=coins.length-1;i>=0;i--){const c=coins[i];c.position.z+=speed*dt;c.rotation.y+=dt*6;if(c.position.z>15){scene.remove(c);coins.splice(i,1)}}
+    score+=speed*dt*.35;
+    document.getElementById("score").textContent="النقاط: "+Math.floor(score);
+    document.getElementById("coins").textContent="🪙 "+coinCount;
+    updateTime(dt);collision();collectCoins();
+  }
+  renderer.render(scene,camera)
+}
+requestAnimationFrame(animate);
+
+addEventListener("resize",()=>{
+  camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)
+});
+document.getElementById("loading").style.display="none";
+</script>
+</body>
+</html>
